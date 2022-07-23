@@ -326,18 +326,6 @@ public class Launcher extends PApplet {
 			currentSelected = null;
 			vertices = new ArrayList<Vertex>();
 		}
-		if (key == 's') {
-			initInfiniteSquare();
-		}
-		if (key == 'h') {
-			initInfiniteHex(false);
-		}
-		if (key == 't') {
-			initInfiniteTri(false);
-		}
-		if (key == 'b') {
-			initBinaryTree();
-		}
 		if (key == 'p') {
 			ArrayList<ArrayList<Vertex>> all = lookForSupersat(6,6);
 			System.out.println(all.size());
@@ -463,42 +451,42 @@ public class Launcher extends PApplet {
 				myGraph = graph.path;
 			}
 			else if (clicked == 5) {
-				initInfiniteSquare();
+				vertices = DefaultGraphs.initInfiniteSquare(defaultSize, lengthOption, vertices);
 			}
 			else if (clicked == 6) {
-				initInfiniteHex(false);
+				vertices = DefaultGraphs.initInfiniteHex(false, defaultSize, lengthOption, vertices);
 			}
 			else if (clicked == 7) {
-				initInfiniteHex(true);
+				vertices = DefaultGraphs.initInfiniteHex(true, defaultSize, lengthOption, vertices);
 			}
 			else if (clicked == 8) {
-				initInfiniteTri(false);
+				vertices = DefaultGraphs.initInfiniteTri(false, defaultSize, lengthOption, vertices);
 			}
 			else if (clicked == 9) {
-				initInfiniteTri(true);
+				vertices = DefaultGraphs.initInfiniteTri(true, defaultSize, lengthOption, vertices);
 			}
 			else if (clicked == 10) {
-				initBinaryTree();
+				vertices = DefaultGraphs.initBinaryTree(defaultSize, displayWidth, displayHeight, lengthOption, vertices);
 			}
 			else if (clicked == 11) {
-				initInfiniteOctagram();
+				vertices = DefaultGraphs.initInfiniteOctagram(false, defaultSize, lengthOption, vertices);
 			}
 			if (mouseX > 130) {
 				if (myGraph != graph.none) {
 					if (myGraph == graph.cycle) {
-						initCycle(mouseX,mouseY);
+						vertices = DefaultGraphs.initCycle(mouseX, mouseY, defaultSize, displayWidth, displayHeight, lengthOption, vertices);
 					}
 					if (myGraph == graph.star) {
-						initStar(mouseX,mouseY);
+						vertices = DefaultGraphs.initStar(mouseX, mouseY, defaultSize, displayWidth, displayHeight, lengthOption, vertices);
 					}
 					if (myGraph == graph.wheel) {
-						initWheel(mouseX,mouseY);
+						vertices = DefaultGraphs.initWheel(mouseX, mouseY, defaultSize, displayWidth, displayHeight, lengthOption, vertices);
 					}
 					if (myGraph == graph.complete) {
-						initComplete(mouseX,mouseY);
+						vertices = DefaultGraphs.initComplete(mouseX, mouseY, defaultSize, displayWidth, displayHeight, lengthOption, vertices);
 					}
 					if (myGraph == graph.path) {
-						initPath(mouseX,mouseY);
+						vertices = DefaultGraphs.initPath(mouseX, mouseY, defaultSize, displayWidth, displayHeight, lengthOption, vertices);
 					}
 					myGraph = graph.none;
 				}
@@ -967,246 +955,7 @@ public class Launcher extends PApplet {
 		}
 		return tempVertices;
 	}
-	public void initCycle(int sX, int sY) {
-		int tempSize = defaultSize;
-		if (sX+defaultSize > displayWidth*13/14) {
-			defaultSize = displayWidth*13/14 - sX - 20;
-		}
-		if (sX-defaultSize < 0) {
-			defaultSize = sX - 20;
-		}
-		if (sY+defaultSize > displayHeight*13/14) {
-			defaultSize = displayHeight*13/14 - sY - 20;
-		}
-		if (sY-defaultSize < 0) {
-			defaultSize = sY - 20;
-		}
-		int sL = vertices.size();
-		for (int i = 0; i < lengthOption; i++) {
-			vertices.add(new Vertex((float)(sX+Math.cos(i*2*Math.PI/lengthOption)*defaultSize),(float)(sY+Math.sin(i*2*Math.PI/lengthOption)*defaultSize)));
-			if (i > 0) {
-				vertices.get(sL+i-1).connections.add(vertices.get(sL+i));
-				vertices.get(sL+i).connections.add(vertices.get(sL+i-1));
-			}
-		}
-		vertices.get(sL+lengthOption-1).connections.add(vertices.get(sL));
-		vertices.get(sL).connections.add(vertices.get(sL+lengthOption-1));
-		defaultSize = tempSize;
-	}
-	public void initStar(int sX, int sY) {
-		int tempSize = defaultSize;
-		if (sX+defaultSize > displayWidth*13/14) {
-			defaultSize = displayWidth*13/14 - sX - 20;
-		}
-		if (sX-defaultSize < 0) {
-			defaultSize = sX - 20;
-		}
-		if (sY+defaultSize > displayHeight*13/14) {
-			defaultSize = displayHeight*13/14 - sY - 20;
-		}
-		if (sY-defaultSize < 0) {
-			defaultSize = sY - 20;
-		}
-		int sL = vertices.size();
-		vertices.add(new Vertex(sX,sY));
-		for (int i = 0; i < lengthOption; i++) {
-			vertices.add(new Vertex((float)(sX+Math.cos(i*2*Math.PI/lengthOption)*defaultSize),(float)(sY+Math.sin(i*2*Math.PI/lengthOption)*defaultSize)));
-			vertices.get(sL).connections.add(vertices.get(sL+i+1));
-			vertices.get(sL+i+1).connections.add(vertices.get(sL));
-		}
-		defaultSize = tempSize;
-	}
-	public void initWheel(int sX, int sY) {
-		int tempSize = defaultSize;
-		if (sX+defaultSize > displayWidth*13/14) {
-			defaultSize = displayWidth*13/14 - sX - 20;
-		}
-		if (sX-defaultSize < 0) {
-			defaultSize = sX - 20;
-		}
-		if (sY+defaultSize > displayHeight*13/14) {
-			defaultSize = displayHeight*13/14 - sY - 20;
-		}
-		if (sY-defaultSize < 0) {
-			defaultSize = sY - 20;
-		}
-		int sL = vertices.size();
-		vertices.add(new Vertex(sX,sY));
-		for (int i = 0; i < lengthOption; i++) {
-			vertices.add(new Vertex((float)(sX+Math.cos(i*2*Math.PI/lengthOption)*defaultSize),(float)(sY+Math.sin(i*2*Math.PI/lengthOption)*defaultSize)));
-			if (i > 0) {
-				vertices.get(sL+i).connections.add(vertices.get(sL+i+1));
-				vertices.get(sL+i+1).connections.add(vertices.get(sL+i));
-			}
-			vertices.get(sL).connections.add(vertices.get(sL+i+1));
-			vertices.get(sL+i+1).connections.add(vertices.get(sL));
-		}
-		vertices.get(sL+lengthOption).connections.add(vertices.get(sL+1));
-		vertices.get(sL+1).connections.add(vertices.get(sL+lengthOption));
-		defaultSize = tempSize;
-	}
-	public void initComplete(int sX, int sY) {
-		int tempSize = defaultSize;
-		if (sX+defaultSize > displayWidth*13/14) {
-			defaultSize = displayWidth*13/14 - sX - 20;
-		}
-		if (sX-defaultSize < 0) {
-			defaultSize = sX - 20;
-		}
-		if (sY+defaultSize > displayHeight*13/14) {
-			defaultSize = displayHeight*13/14 - sY - 20;
-		}
-		if (sY-defaultSize < 0) {
-			defaultSize = sY - 20;
-		}
-		int sL = vertices.size();
-		for (int i = 0; i < lengthOption; i++) {
-			vertices.add(new Vertex((float)(sX+Math.cos(i*2*Math.PI/lengthOption)*defaultSize),(float)(sY+Math.sin(i*2*Math.PI/lengthOption)*defaultSize)));
-			
-		}
-		for (int i = sL; i < sL + lengthOption; i++) {
-			for (int z = sL; z < sL + lengthOption; z++) {
-				if (z != i) {
-					vertices.get(i).connections.add(vertices.get(z));
-					vertices.get(z).connections.add(vertices.get(i));
-				}
-			}
-		}
-		defaultSize = tempSize;
-	}
-	public void initPath(int sX, int sY) {
-		int tempSize = defaultSize;
-		if (sX+defaultSize > displayWidth*13/14) {
-			defaultSize = displayWidth*13/14 - sX - 20;
-		}
-		if (sX-defaultSize < 0) {
-			defaultSize = sX - 20;
-		}
-		int sL = vertices.size();
-		for (int i = 0; i < lengthOption; i++) {
-			vertices.add(new Vertex((float)(sX-defaultSize+defaultSize*2*i/lengthOption),(float)(sY)));
-			if (i > 0) {
-				vertices.get(sL+i-1).connections.add(vertices.get(sL+i));
-				vertices.get(sL+i).connections.add(vertices.get(sL+i-1));
-			}
-		}
-		defaultSize = tempSize;
-	}
-	public void initInfiniteSquare() {
-		int sL = vertices.size();
-		int hori = lengthOption;
-		int vert = lengthOption;
-		for (int i = 0; i < vert; i++) {
-			for (int z = 0; z < hori; z++) {
-				vertices.add(new Vertex(150+defaultSize*z,20+defaultSize*i));
-				if (z > 0) {
-					vertices.get(sL+z+hori*i-1).connections.add(vertices.get(sL+z+hori*i));
-					vertices.get(sL+z+hori*i).connections.add(vertices.get(sL+z+hori*i-1));
-				}
-				if (i > 0) {
-					vertices.get(sL+z+hori*(i-1)).connections.add(vertices.get(sL+z+hori*i));
-					vertices.get(sL+z+hori*i).connections.add(vertices.get(sL+z+hori*(i-1)));
-				}
-			}
-		}
-	}
-	public void initInfiniteHex(Boolean shift) {
-		int sL = vertices.size();
-		int hori = lengthOption;
-		int vert = lengthOption;
-		for (int i = 0; i < vert; i++) {
-			for (int z = 0; z < hori; z++) {
-				if (shift) {
-					vertices.add(new Vertex(150+defaultSize*(z-(float)(i%2)/2+(int)((z+(i%2))/2)),20+(float)(defaultSize*Math.sqrt(3)/2)*i));
-				}
-				else {
-					vertices.add(new Vertex(150+defaultSize*(z),20+(float)(defaultSize*Math.sqrt(3)/2)*i));
-				}
-				if (z > 0) {
-					if (((z%2)+(i%2))%2 == 1) {
-						vertices.get(sL+z+hori*i-1).connections.add(vertices.get(sL+z+hori*i));
-						vertices.get(sL+z+hori*i).connections.add(vertices.get(sL+z+hori*i-1));
-					}
-				}
-				if (i > 0) {
-					vertices.get(sL+z+hori*(i-1)).connections.add(vertices.get(sL+z+hori*i));
-					vertices.get(sL+z+hori*i).connections.add(vertices.get(sL+z+hori*(i-1)));
-				}
-			}
-		}
-	}
-	public void initInfiniteTri(Boolean shift) {
-		int sL = vertices.size();
-		int hori = lengthOption;
-		int vert = lengthOption;
-		for (int i = 0; i < vert; i++) {
-			for (int z = 0; z < hori; z++) {
-				if (shift) {
-					vertices.add(new Vertex(150+defaultSize*(z-(float)(i%2)/2-i/2),20+(float)(defaultSize*Math.sqrt(3)/2)*i));
-				}
-				else {
-					vertices.add(new Vertex(150+defaultSize*(z),20+(float)(defaultSize*Math.sqrt(3)/2)*i));
-				}
-				if (z > 0) {
-					vertices.get(sL+z+hori*i-1).connections.add(vertices.get(sL+z+hori*i));
-					vertices.get(sL+z+hori*i).connections.add(vertices.get(sL+z+hori*i-1));
-				}
-				if (i > 0 && z > 0) {
-					vertices.get(sL+z+hori*(i-1)).connections.add(vertices.get(sL+z+hori*i));
-					vertices.get(sL+z+hori*i).connections.add(vertices.get(sL+z+hori*(i-1)));
-					if (z > 0 && z < hori-1) {
-						vertices.get(sL+z+hori*(i-1)-1).connections.add(vertices.get(sL+z+hori*i));
-						vertices.get(sL+z+hori*i).connections.add(vertices.get(sL+z+hori*(i-1)-1));
-					}
-					
-				}
-			}
-		}
-	}
-	public void initBinaryTree() {
-		int sL = vertices.size();
-		for (int i = 0; i < lengthOption; i++) {
-			for (int z = 0; z < Math.pow(2, i); z++) {
-				System.out.println(i*defaultSize*Math.sin(z*Math.PI/Math.pow(2, i)));
-				
-				vertices.add(new Vertex(
-						(float)(displayWidth/2 + Math.pow(i,.85)*defaultSize * (float)Math.cos((z+0.5)*Math.PI/Math.pow(2, i))),
-						(float)((float)(displayHeight * 9/10) - Math.pow(i,.85)*defaultSize * (float)Math.sin((z+0.5)*Math.PI/Math.pow(2, i)))
-						));
-				if (i > 0) {
-					vertices.get((int)(vertices.size()-1-z-(Math.pow(2, i-1)-Math.ceil(z/2)))).connections.add(vertices.get(vertices.size()-1));
-					vertices.get(vertices.size()-1).connections.add(vertices.get((int)(vertices.size()-1-z-(Math.pow(2, i-1)-Math.ceil(z/2)))));
-
-				}
-			}
-			
-		}
-	}
-	public void initInfiniteOctagram() {
-		int sL = vertices.size();
-		int hori = lengthOption;
-		int vert = lengthOption;
-		for (int i = 0; i < vert; i++) {
-			for (int z = 0; z < hori; z++) {
-				vertices.add(new Vertex(150+defaultSize*(z),20+(float)(defaultSize*Math.sqrt(3)/2)*i));
-				if (z > 0) {
-					vertices.get(sL+z+hori*i-1).connections.add(vertices.get(sL+z+hori*i));
-					vertices.get(sL+z+hori*i).connections.add(vertices.get(sL+z+hori*i-1));
-				}
-				if (i > 0 && z > 0) {
-					vertices.get(sL+z+hori*(i-1)).connections.add(vertices.get(sL+z+hori*i));
-					vertices.get(sL+z+hori*i).connections.add(vertices.get(sL+z+hori*(i-1)));
-					if (z > 0 && z < hori-1) {
-						vertices.get(sL+z+hori*(i-1)-1).connections.add(vertices.get(sL+z+hori*i));
-						vertices.get(sL+z+hori*i).connections.add(vertices.get(sL+z+hori*(i-1)-1));
-						vertices.get(sL+z+hori*(i-1)+1).connections.add(vertices.get(sL+z+hori*i));
-						vertices.get(sL+z+hori*i).connections.add(vertices.get(sL+z+hori*(i-1)+1));
-					}
-					
-				}
-			}
-		}
-	}
+	
 	public Vertex getVClicked() {
 		for (Vertex v : vertices) {
 			if ((v.x-mouseX)*(v.x-mouseX)+(v.y-mouseY)*(v.y-mouseY) < pointSize*pointSize) {
