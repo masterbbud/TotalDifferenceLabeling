@@ -253,4 +253,44 @@ public class DefaultGraphs {
 		}
         return vertices;
 	}
+    public static ArrayList<ArrayList<Vertex>> getAllGraphsForOrder(int order, float sX, float sY, int defaultSize) {
+        ArrayList<Vertex> tempVertices = new ArrayList<Vertex>();
+        for (int i = 0; i < order; i++) {
+            tempVertices.add(new Vertex((float)(sX+Math.cos(i*2*Math.PI/order)*defaultSize),(float)(sY+Math.sin(i*2*Math.PI/order)*defaultSize)));
+        }
+        
+        //now try each config of edges
+        ArrayList<int[]> allEdges = new ArrayList<int[]>();
+        for (int a = 0; a < order; a++) {
+            for (int b = 0; b < order; b++) {
+                if (a < b) {
+                    allEdges.add(new int[] {a,b});
+                }
+            }
+        }
+        int perms = 1<<(allEdges.size());
+        ArrayList<ArrayList<Vertex>> retList = new ArrayList<ArrayList<Vertex>>();
+        for (int i = 0; i < perms; i++) {
+            String nowPerm = Integer.toBinaryString(i);
+            char[] chars = nowPerm.toCharArray();
+            ArrayList<Vertex> oneGraph = XTDCheck.copy(tempVertices);
+            for (int c = 0; c < chars.length; c++) {
+                if (chars[c] == '1') {
+                    oneGraph.get(allEdges.get(c)[0]).connections.add(oneGraph.get(allEdges.get(c)[1]));
+                    oneGraph.get(allEdges.get(c)[1]).connections.add(oneGraph.get(allEdges.get(c)[0]));
+                }
+            }
+            retList.add(oneGraph);
+        }
+        return retList;
+    }
+    public static ArrayList<ArrayList<Vertex>> getAllGraphsForRange(int start, int end, float sX, float sY, int defaultSize) {
+        ArrayList<ArrayList<Vertex>> retList = new ArrayList<ArrayList<Vertex>>();
+        for (int i = start; i <= end; i++) {
+            for (ArrayList<Vertex> g : getAllGraphsForOrder(i, sX, sY, defaultSize)) {
+                retList.add(g);
+            }
+        }
+        return retList;
+    }
 }

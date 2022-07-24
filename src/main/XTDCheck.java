@@ -16,10 +16,7 @@ import processing.event.MouseEvent;
 
 public class XTDCheck {
 
-    public static ArrayList<Vertex> check(int testXtd, ArrayList<Vertex> vertices) {
-        return null;  // FIX THIS IN LAUNCHER
-    }
-    public static ArrayList<Vertex> check(int testXtd, ArrayList<Vertex> vertices, CheckXtdThread thread) {
+    public static ArrayList<Vertex> check(int testXtd, ArrayList<Vertex> vertices, DefaultThread thread) {
 		//System.out.println(vertices.get(0).possibles);
 		Vertex toCheck = vertices.get(0);
 		for (Vertex v : vertices) {
@@ -403,5 +400,135 @@ public class XTDCheck {
 			}
 		}
 		return tempVertices;
+	}
+
+    public static ArrayList<ArrayList<Vertex>> lookForSupersat(int start, int end, float sX, float sY, int defaultSize, CheckSetThread thread) {
+
+        // What we want to do:
+        // Get all graphs for our start and end
+        // Check by graph
+
+        
+
+		//order = 5;
+
+        ArrayList<ArrayList<Vertex>> all = DefaultGraphs.getAllGraphsForRange(start, end, sX, sY, defaultSize);
+        System.out.println("N Graphs :  "+all.size());
+        ArrayList<ArrayList<Vertex>> superSats = new ArrayList<ArrayList<Vertex>>();
+
+        for (ArrayList<Vertex> graph : all) {
+            System.out.println("RUNNING FOR GRAPH SIZE "+graph.size());
+            int testXtd = 1;
+            ArrayList<Vertex> oneTest = check(testXtd, (ArrayList<Vertex>)graph.clone(), thread);
+            while (oneTest == null) {
+                testXtd++;
+                oneTest = check(testXtd, (ArrayList<Vertex>)graph.clone(), thread);
+            }
+            graph = oneTest;
+            //System.out.println(i+" "+nowPerm+" "+perms);
+            
+            if (testXtd == graph.size() && Checks.graphConnected(graph)) {
+                //System.out.println("orderstf"+testXtd+" "+order);
+                ArrayList<Vertex> neww = graph;
+                superSats.add(copy(neww));
+            }
+        }
+        ArrayList<ArrayList<Vertex>> alltwo = new ArrayList<ArrayList<Vertex>>();
+		for (ArrayList<Vertex> a : superSats) {
+			if (Checks.graphSaturable(a) == 2) {
+				alltwo.add(a);
+				//System.out.println("added");
+			}
+		}
+		return alltwo;
+		/*
+		while (order <= end) {
+			ArrayList<Vertex> tempVertices = new ArrayList<Vertex>();
+			for (int i = 0; i < order; i++) {
+				tempVertices.add(new Vertex((float)(sX+Math.cos(i*2*Math.PI/order)*defaultSize),(float)(sY+Math.sin(i*2*Math.PI/order)*defaultSize)));
+			}
+			
+			//now try each config of edges
+			ArrayList<int[]> allEdges = new ArrayList<int[]>();
+			for (int a = 0; a < order; a++) {
+				for (int b = 0; b < order; b++) {
+					if (a < b) {
+						allEdges.add(new int[] {a,b});
+					}
+				}
+			}
+			int perms = 1<<(allEdges.size());
+			for (int i = 0; i < perms; i++) {
+				String nowPerm = Integer.toBinaryString(i);
+				char[] chars = nowPerm.toCharArray();
+				for (int c = 0; c < chars.length; c++) {
+					if (chars[c] == '1') {
+						tempVertices.get(allEdges.get(c)[0]).connections.add(tempVertices.get(allEdges.get(c)[1]));
+						tempVertices.get(allEdges.get(c)[1]).connections.add(tempVertices.get(allEdges.get(c)[0]));
+					}
+				}
+				//check(testXtd, tempVertices);
+				//if (true) {
+				//	return null;
+				//}
+				testXtd = 1;
+				ArrayList<Vertex> oneTest = XTDCheck.check(testXtd, (ArrayList<Vertex>)tempVertices.clone());
+					while (oneTest == null) {
+						testXtd++;
+						oneTest = XTDCheck.check(testXtd, (ArrayList<Vertex>)tempVertices.clone());
+					}
+					tempVertices = oneTest;
+				//System.out.println(i+" "+nowPerm+" "+perms);
+				
+				if (testXtd == order && Checks.graphConnected(tempVertices)) {
+					//System.out.println("orderstf"+testXtd+" "+order);
+					ArrayList<Vertex> neww = tempVertices;
+					all.add(copy(neww));
+					for (Vertex v : tempVertices) {
+						v.connections = new ArrayList<Vertex>();
+						v.num = 0;
+					}
+				}
+				else {
+					//reset + continue
+					for (Vertex v : tempVertices) {
+						v.connections = new ArrayList<Vertex>();
+						v.num = 0;
+					}
+				}
+				
+				//check, reset, continue
+				
+				 
+			}
+			//System.out.println(perms);
+			
+			order++;
+		}
+		ArrayList<ArrayList<Vertex>> alltwo = new ArrayList<ArrayList<Vertex>>();
+		for (ArrayList<Vertex> a : all) {
+			if (Checks.graphSaturable(a) == 2) {
+				alltwo.add(a);
+				//System.out.println("added");
+			}
+		}
+		return alltwo;*/
+	}
+
+    public static ArrayList<Vertex> copy(ArrayList<Vertex> ver){
+		ArrayList<Vertex> newL = new ArrayList<Vertex>();
+		for (Vertex v : ver) {
+			newL.add(new Vertex(v.x, v.y));
+			newL.get(newL.size()-1).num = v.num;
+		}
+		for (int v = 0; v < ver.size(); v++) {
+			for (int i = 0; i < ver.size(); i++) {
+				if (ver.get(v).connections.contains(ver.get(i))) {
+					newL.get(v).connections.add(newL.get(i));
+				}
+			}
+		}
+		return newL;
+		
 	}
 }

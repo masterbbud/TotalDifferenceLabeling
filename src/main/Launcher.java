@@ -189,11 +189,7 @@ public class Launcher extends PApplet {
 		// May want to remove from views
 	}
 	public void getAllSupersats(){
-		ArrayList<ArrayList<Vertex>> all = lookForSupersat(5,5);
-		System.out.println(all.size());
-		currentView = 0;
-		vertices = all.get(all.size()-1);
-		storeAll = all;
+		checkSupersatsThread(5, 5, displayWidth/2, displayHeight/2, defaultSize);
 	}
 	public void moveViewRight(){
 		if (currentView < storeAll.size()-1) {
@@ -308,34 +304,8 @@ public class Launcher extends PApplet {
 			testXtd ++;
 		}
 		if (click(15,200,100,30)) {
-			vertices = checkXtd(testXtd);
+			checkXtd(testXtd);
 		}
-	}
-	public ArrayList<Vertex> checkXtd(int xtd) {
-		ThreadData sendTd = new ThreadData("???", vertices.size(), Checks.countEdges(vertices));
-		threads.add(sendTd);
-		Thread thread = new Thread(new CheckXtdThread(xtd, vertices, sendTd, this));
-		thread.start();
-		return new ArrayList<Vertex>();
-	}
-	public void xtdThreadDone(ArrayList<Vertex> result, ThreadData thread) {
-		if (result == null){
-			thread.failed = true;
-		}
-		else if (result.size() == 0) {
-			thread.failed = true;
-		}
-		else {
-			storeAll.add(result);
-			thread.currXtd += 1;
-			thread.done = true;
-		}
-	}
-	public void updateThreadTestXtd(ThreadData thread, int xtd) {
-		thread.currXtd = xtd;
-	}
-	public void closeThread(ThreadData thread) {
-		threads.remove(thread);
 	}
 	public void connectAllVertices() {
 		for (Vertex v : vertices) {
@@ -481,101 +451,59 @@ public class Launcher extends PApplet {
 		}
 		return null;
 	}
-	public ArrayList<ArrayList<Vertex>> lookForSupersat(int start, int end) {
-		//order = 5;
-		int order = start;
-		float sX = displayWidth/2;
-		float sY = displayHeight/2;
-		ArrayList<ArrayList<Vertex>> all = new ArrayList<ArrayList<Vertex>>();
-		
-		while (order <= end) {
-			ArrayList<Vertex> tempVertices = new ArrayList<Vertex>();
-			for (int i = 0; i < order; i++) {
-				tempVertices.add(new Vertex((float)(sX+Math.cos(i*2*Math.PI/order)*defaultSize),(float)(sY+Math.sin(i*2*Math.PI/order)*defaultSize)));
-			}
-			
-			//now try each config of edges
-			ArrayList<int[]> allEdges = new ArrayList<int[]>();
-			for (int a = 0; a < order; a++) {
-				for (int b = 0; b < order; b++) {
-					if (a < b) {
-						allEdges.add(new int[] {a,b});
-					}
-				}
-			}
-			int perms = 1<<(allEdges.size());
-			for (int i = 0; i < perms; i++) {
-				String nowPerm = Integer.toBinaryString(i);
-				char[] chars = nowPerm.toCharArray();
-				for (int c = 0; c < chars.length; c++) {
-					if (chars[c] == '1') {
-						tempVertices.get(allEdges.get(c)[0]).connections.add(tempVertices.get(allEdges.get(c)[1]));
-						tempVertices.get(allEdges.get(c)[1]).connections.add(tempVertices.get(allEdges.get(c)[0]));
-					}
-				}
-				//check(testXtd, tempVertices);
-				//if (true) {
-				//	return null;
-				//}
-				testXtd = 1;
-				ArrayList<Vertex> oneTest = XTDCheck.check(testXtd, (ArrayList<Vertex>)tempVertices.clone());
-					while (oneTest == null) {
-						testXtd++;
-						oneTest = XTDCheck.check(testXtd, (ArrayList<Vertex>)tempVertices.clone());
-					}
-					tempVertices = oneTest;
-				//System.out.println(i+" "+nowPerm+" "+perms);
-				
-				if (testXtd == order && Checks.graphConnected(tempVertices)) {
-					//System.out.println("orderstf"+testXtd+" "+order);
-					ArrayList<Vertex> neww = tempVertices;
-					all.add(copy(neww));
-					for (Vertex v : tempVertices) {
-						v.connections = new ArrayList<Vertex>();
-						v.num = 0;
-					}
-				}
-				else {
-					//reset + continue
-					for (Vertex v : tempVertices) {
-						v.connections = new ArrayList<Vertex>();
-						v.num = 0;
-					}
-				}
-				
-				//check, reset, continue
-				
-				 
-			}
-			//System.out.println(perms);
-			
-			order++;
-		}
-		ArrayList<ArrayList<Vertex>> alltwo = new ArrayList<ArrayList<Vertex>>();
-		for (ArrayList<Vertex> a : all) {
-			if (Checks.graphSaturable(a) == 2) {
-				alltwo.add(a);
-				//System.out.println("added");
-			}
-		}
-		return alltwo;
+
+	// ----------------------------------------------------------- CHECK THREADS ---------------------------------------------------------------- //
+
+	public ArrayList<Vertex> checkXtd(int xtd) {
+		ThreadData sendTd = new ThreadData("???", vertices.size(), Checks.countEdges(vertices));
+		threads.add(sendTd);
+		Thread thread = new Thread(new CheckXtdThread(xtd, vertices, sendTd, this));
+		thread.start();
+		return new ArrayList<Vertex>();
 	}
-	public ArrayList<Vertex> copy(ArrayList<Vertex> ver){
-		ArrayList<Vertex> newL = new ArrayList<Vertex>();
-		for (Vertex v : ver) {
-			newL.add(new Vertex(v.x, v.y));
-			newL.get(newL.size()-1).num = v.num;
+	public void xtdThreadDone(ArrayList<Vertex> result, ThreadData thread) {
+		if (result == null){
+			thread.failed = true;
 		}
-		for (int v = 0; v < ver.size(); v++) {
-			for (int i = 0; i < ver.size(); i++) {
-				if (ver.get(v).connections.contains(ver.get(i))) {
-					newL.get(v).connections.add(newL.get(i));
-				}
-			}
+		else if (result.size() == 0) {
+			thread.failed = true;
 		}
-		return newL;
-		
+		else {
+			storeAll.add(result);
+			thread.currXtd += 1;
+			thread.done = true;
+		}
 	}
+	public void updateThreadTestXtd(ThreadData thread, int xtd) {
+		thread.currXtd = xtd;
+	}
+	public void closeThread(ThreadData thread) {
+		threads.remove(thread);
+	}
+
+	public ArrayList<ArrayList<Vertex>> checkSupersatsThread(int start, int end, float sX, float sY, int defaultSize) {
+		ThreadData sendTd = new ThreadData("Checking Supersats", 1, 1);
+		threads.add(sendTd);
+		Thread thread = new Thread(new CheckSetThread(sendTd, start, end, sX, sY, defaultSize, this));
+		thread.start();
+		return new ArrayList<ArrayList<Vertex>>();
+	}
+	public void setThreadDone(ArrayList<ArrayList<Vertex>> result, ThreadData thread) {
+		if (result == null){
+			thread.failed = true;
+		}
+		else if (result.size() == 0) {
+			thread.failed = true;
+		}
+		else {
+			for (ArrayList<Vertex> g : result) {
+				storeAll.add(g);
+			}
+			thread.currXtd = 0;
+			thread.done = true;
+		}
+	}
+
 
 	// ---------------------------------------------------------------- UI ---------------------------------------------------------------------- //
 

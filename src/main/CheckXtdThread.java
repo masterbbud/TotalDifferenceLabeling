@@ -13,12 +13,13 @@ import processing.core.PApplet;
 import processing.core.PVector;
 import processing.event.MouseEvent;
 
-public class CheckXtdThread implements Runnable{
+public class CheckXtdThread extends DefaultThread implements Runnable{
+    
     private int xtd;
     private ArrayList<Vertex> vertices;
     private ThreadData td;
     private Launcher launcher;
-    public Boolean stopASAP = false;
+
     public CheckXtdThread(int xtd, ArrayList<Vertex> vertices, ThreadData td, Launcher launcher) {
         this.xtd = xtd;
         this.vertices = vertices;
@@ -46,9 +47,5 @@ public class CheckXtdThread implements Runnable{
 		else {
 			return XTDCheck.check(xtd, (ArrayList<Vertex>)vertices.clone(), this);
 		}
-    }
-    public void stop() {
-        System.out.println("TOLD TO STOP");
-        stopASAP = true;
     }
 }
