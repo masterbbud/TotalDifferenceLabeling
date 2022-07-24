@@ -174,4 +174,11 @@ public class Checks {
 		}
 		return stairs;
 	}
+    public static int countEdges(ArrayList<Vertex> vertices) {
+        int count = 0;
+        for (Vertex v : vertices) {
+            count += v.connections.size();
+        }
+        return (int) count/2;
+    }
 }

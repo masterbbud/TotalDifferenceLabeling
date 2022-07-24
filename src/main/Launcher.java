@@ -53,6 +53,24 @@ public class Launcher extends PApplet {
 	int scrollAmt = 0;
 	Boolean stageMenu = false;
 
+	Boolean mouseUp = true;
+
+	String[] defaultGraphs = new String[]{
+		"Cycle",
+		"Star",
+		"Wheel",
+		"Complete",
+		"Path",
+		"Square Lattice",
+		"Hex Lattice",
+		"Hex Lattice 2",
+		"Tri Lattice",
+		"Tri Lattice 2",
+		"Binary Tree",
+		"Octagram Lattice",
+	};
+
+	ArrayList<ThreadData> threads = new ArrayList<ThreadData>();
 	
 	public static void main(String[] args) {
 		System.out.println("-------------\nINPUT NAME\n-------------\n");
@@ -64,18 +82,9 @@ public class Launcher extends PApplet {
 	}
 
 	public void setup() {
-		graphNames.add("Cycle");
-		graphNames.add("Star");
-		graphNames.add("Wheel");
-		graphNames.add("Complete");
-		graphNames.add("Path");
-		graphNames.add("Square Lattice");
-		graphNames.add("Hex Lattice");
-		graphNames.add("Hex Lattice 2");
-		graphNames.add("Tri Lattice");
-		graphNames.add("Tri Lattice 2");
-		graphNames.add("Binary Tree");
-		graphNames.add("Octagram Lattice");
+		for (String s : defaultGraphs){
+			graphNames.add(s);
+		}
 	}
 	public Boolean click(float x, float y, float x2, float y2) {
 		if (mouseX > x && mouseX < x+x2 && mouseY > y && mouseY < y+y2) {
@@ -109,6 +118,7 @@ public class Launcher extends PApplet {
 //			currentType = "";
 //		}
 	}
+	
 	public void keyPressed() {
 		if (keyCode == ENTER) {
 			nextMode();
@@ -179,14 +189,14 @@ public class Launcher extends PApplet {
 		// May want to remove from views
 	}
 	public void getAllSupersats(){
-		ArrayList<ArrayList<Vertex>> all = lookForSupersat(6,6);
+		ArrayList<ArrayList<Vertex>> all = lookForSupersat(5,5);
 		System.out.println(all.size());
 		currentView = 0;
 		vertices = all.get(all.size()-1);
 		storeAll = all;
 	}
 	public void moveViewRight(){
-		if (currentView < storeAll.size()) {
+		if (currentView < storeAll.size()-1) {
 			currentView++;
 		}
 		vertices = storeAll.get(currentView);
@@ -205,205 +215,73 @@ public class Launcher extends PApplet {
 		int answer = Checks.graphSaturable(nw);
 		System.out.println(answer);
 	}
+	public void topModeClick(){
+		if (myMode == mode.place) {
+			myMode = mode.connect;
+		}
+		else if (myMode == mode.connect) {
+			myMode = mode.place;
+		}
+		else if (myMode == mode.numbers) {
+			myMode = mode.place;
+		}
+	}
+	public void bottomModeClick(){
+		if (myMode == mode.place) {
+			myMode = mode.numbers;
+		}
+		else if (myMode == mode.connect) {
+			myMode = mode.numbers;
+		}
+		else if (myMode == mode.numbers) {
+			myMode = mode.connect;
+		}
+	}
+	public void mouseReleased() {
+		mouseUp = true;
+	}
 	public void mousePressed() {
 		if (click(1320,20,100,30)) {
 			stageMenu = ! stageMenu;
 			return;
 		}
 		if (click(1320,60,100,30) && stageMenu) {
-			if (myMode == mode.place) {
-				myMode = mode.connect;
-			}
-			else if (myMode == mode.connect) {
-				myMode = mode.place;
-			}
-			else if (myMode == mode.numbers) {
-				myMode = mode.place;
-			}
+			topModeClick();
 			return;
 		}
 		if (click(1320,100,100,30) && stageMenu) {
-			if (myMode == mode.place) {
-				myMode = mode.numbers;
-			}
-			else if (myMode == mode.connect) {
-				myMode = mode.numbers;
-			}
-			else if (myMode == mode.numbers) {
-				myMode = mode.connect;
-			}
+			bottomModeClick();
 			return;
 		}
 		if (myMode == mode.place) {
-			if (click(15,30,15,30)) {
-				if (lengthOption > 1) {
-					lengthOption --;
-				}
-			}
-			else if (click(100,30,15,30)) {
-				lengthOption ++;
-			}
-			else if (click(15,90,15,30)) {
-				if (pointSize > 5) {
-					pointSize --;
-				}
-			}
-			else if (click(100,90,15,30)) {
-				if (pointSize < 30) {
-					pointSize ++;
-				}
-			}
-			int clicked = -1;
-			if (click(15,155,100,30)) {
-				clicked = scrollAmt;
-			}
-			else if (click(15,195,100,30)) {
-				clicked = scrollAmt + 1;
-			}
-			else if (click(15,235,100,30)) {
-				clicked = scrollAmt + 2;
-			}
-			else if (click(15,275,100,30)) {
-				clicked = scrollAmt + 3;
-			}
-			else if (click(15,315,100,30)) {
-				clicked = scrollAmt + 4;
-			}
-			if (clicked == 0) {
-				myGraph = graph.cycle;
-			}
-			else if (clicked == 1) {
-				myGraph = graph.star;
-			}
-			else if (clicked == 2) {
-				myGraph = graph.wheel;
-			}
-			else if (clicked == 3) {
-				myGraph = graph.complete;
-			}
-			else if (clicked == 4) {
-				myGraph = graph.path;
-			}
-			else if (clicked == 5) {
-				vertices = DefaultGraphs.initInfiniteSquare(defaultSize, lengthOption, vertices);
-			}
-			else if (clicked == 6) {
-				vertices = DefaultGraphs.initInfiniteHex(false, defaultSize, lengthOption, vertices);
-			}
-			else if (clicked == 7) {
-				vertices = DefaultGraphs.initInfiniteHex(true, defaultSize, lengthOption, vertices);
-			}
-			else if (clicked == 8) {
-				vertices = DefaultGraphs.initInfiniteTri(false, defaultSize, lengthOption, vertices);
-			}
-			else if (clicked == 9) {
-				vertices = DefaultGraphs.initInfiniteTri(true, defaultSize, lengthOption, vertices);
-			}
-			else if (clicked == 10) {
-				vertices = DefaultGraphs.initBinaryTree(defaultSize, displayWidth, displayHeight, lengthOption, vertices);
-			}
-			else if (clicked == 11) {
-				vertices = DefaultGraphs.initInfiniteOctagram(false, defaultSize, lengthOption, vertices);
+			if (clickLeftUI()){
+				return;
 			}
 			if (mouseX > 130) {
-				if (myGraph != graph.none) {
-					if (myGraph == graph.cycle) {
-						vertices = DefaultGraphs.initCycle(mouseX, mouseY, defaultSize, displayWidth, displayHeight, lengthOption, vertices);
-					}
-					if (myGraph == graph.star) {
-						vertices = DefaultGraphs.initStar(mouseX, mouseY, defaultSize, displayWidth, displayHeight, lengthOption, vertices);
-					}
-					if (myGraph == graph.wheel) {
-						vertices = DefaultGraphs.initWheel(mouseX, mouseY, defaultSize, displayWidth, displayHeight, lengthOption, vertices);
-					}
-					if (myGraph == graph.complete) {
-						vertices = DefaultGraphs.initComplete(mouseX, mouseY, defaultSize, displayWidth, displayHeight, lengthOption, vertices);
-					}
-					if (myGraph == graph.path) {
-						vertices = DefaultGraphs.initPath(mouseX, mouseY, defaultSize, displayWidth, displayHeight, lengthOption, vertices);
-					}
-					myGraph = graph.none;
-				}
-				else {
-					vertices.add(new Vertex(mouseX,mouseY));
-				}
+				placeElement();
+				return;
 			}
 		}
-		else {
-			if (click(15,90,15,30)) {
-				if (pointSize > 5) {
-					pointSize --;
-				}
+		if (click(15,90,15,30)) {
+			if (pointSize > 5) {
+				pointSize --;
 			}
-			else if (click(100,90,15,30)) {
-				if (pointSize < 30) {
-					pointSize ++;
-				}
+		}
+		else if (click(100,90,15,30)) {
+			if (pointSize < 30) {
+				pointSize ++;
 			}
 		}
 		if (myMode == mode.connect) {
-			
-			Vertex clicked = getVClicked();
-			if (clicked != null) {
-				if (currentSelected != null) {
-					if (! currentSelected.connections.contains(clicked)) {
-						currentSelected.connections.add(clicked);
-					}
-					if (! clicked.connections.contains(currentSelected)) {
-						clicked.connections.add(currentSelected);
-					}
-				}
-				currentSelected = clicked;
-				
+			if (clickVertex()){
+				return;
 			}
 			if (click(15,30,100,30)) {
-				for (Vertex v : vertices) {
-					for (Vertex i : vertices) {
-						if (i != v) {
-							if (!v.connections.contains(i)) {
-								v.connections.add(i);
-							}
-							if (!i.connections.contains(v)) {
-								i.connections.add(v);
-							}
-						}
-					}
-				}
+				connectAllVertices();
 			}
 		}
 		if (myMode == mode.numbers) {
-			Vertex clicked = getVClicked();
-			if (clicked != null) {
-				currentSelected = clicked;
-				currentSelected.num = 0;
-			}
-			if (click(15,30,100,30)) {
-				for (Vertex v : vertices) {
-					v.num = 0;
-				}
-			}
-			if (click(15,150,15,30)) {
-				if (testXtd > 0) {
-					testXtd --;
-				}
-			}
-			if (click(100,150,15,30)) {
-				testXtd ++;
-			}
-			if (click(15,200,100,30)) {
-				if (testXtd == 0) {
-					testXtd = 1;
-					ArrayList<Vertex> tempVertices = XTDCheck.check(testXtd, (ArrayList<Vertex>)vertices.clone());
-					while (tempVertices == null) {
-						testXtd++;
-						tempVertices = XTDCheck.check(testXtd, (ArrayList<Vertex>)vertices.clone());
-					}
-					vertices = tempVertices;
-				}
-				else {
-					vertices = XTDCheck.check(testXtd, (ArrayList<Vertex>)vertices.clone());
-				}
-			}
+			handleNumbersClick();
 		}
 		
 		setBadVertices();
@@ -411,7 +289,181 @@ public class Launcher extends PApplet {
 		//connect points if connecting points
 		
 	}
-	
+	public void handleNumbersClick() {
+		Vertex clicked = getVClicked();
+		if (clicked != null) {
+			currentSelected = clicked;
+		}
+		if (click(15,30,100,30)) {
+			for (Vertex v : vertices) {
+				v.num = 0;
+			}
+		}
+		if (click(15,150,15,30)) {
+			if (testXtd > 0) {
+				testXtd --;
+			}
+		}
+		if (click(100,150,15,30)) {
+			testXtd ++;
+		}
+		if (click(15,200,100,30)) {
+			vertices = checkXtd(testXtd);
+		}
+	}
+	public ArrayList<Vertex> checkXtd(int xtd) {
+		ThreadData sendTd = new ThreadData("???", vertices.size(), Checks.countEdges(vertices));
+		threads.add(sendTd);
+		Thread thread = new Thread(new CheckXtdThread(xtd, vertices, sendTd, this));
+		thread.start();
+		return new ArrayList<Vertex>();
+	}
+	public void xtdThreadDone(ArrayList<Vertex> result, ThreadData thread) {
+		if (result == null){
+			thread.failed = true;
+		}
+		else if (result.size() == 0) {
+			thread.failed = true;
+		}
+		else {
+			storeAll.add(result);
+			thread.currXtd += 1;
+			thread.done = true;
+		}
+	}
+	public void updateThreadTestXtd(ThreadData thread, int xtd) {
+		thread.currXtd = xtd;
+	}
+	public void closeThread(ThreadData thread) {
+		threads.remove(thread);
+	}
+	public void connectAllVertices() {
+		for (Vertex v : vertices) {
+			for (Vertex i : vertices) {
+				if (i != v) {
+					if (!v.connections.contains(i)) {
+						v.connections.add(i);
+					}
+					if (!i.connections.contains(v)) {
+						i.connections.add(v);
+					}
+				}
+			}
+		}
+	}
+	public Boolean clickVertex() {
+		Vertex clicked = getVClicked();
+		if (clicked != null) {
+			if (currentSelected != null) {
+				if (! currentSelected.connections.contains(clicked)) {
+					currentSelected.connections.add(clicked);
+				}
+				if (! clicked.connections.contains(currentSelected)) {
+					clicked.connections.add(currentSelected);
+				}
+			}
+			currentSelected = clicked;
+			return true;
+		}
+		return false;
+	}
+	public Boolean clickLeftUI() {
+		if (click(15,30,15,30)) {
+			if (lengthOption > 1) {
+				lengthOption --;
+			}
+			return true;
+		}
+		else if (click(100,30,15,30)) {
+			lengthOption ++;
+			return true;
+		}
+		if (clickScrollBar()){
+			return true;
+		}
+		return false;
+	}
+	public Boolean clickScrollBar() {
+		int clicked = -1;
+		if (click(15,155,100,30)) {
+			clicked = scrollAmt;
+		}
+		else if (click(15,195,100,30)) {
+			clicked = scrollAmt + 1;
+		}
+		else if (click(15,235,100,30)) {
+			clicked = scrollAmt + 2;
+		}
+		else if (click(15,275,100,30)) {
+			clicked = scrollAmt + 3;
+		}
+		else if (click(15,315,100,30)) {
+			clicked = scrollAmt + 4;
+		}
+		if (clicked == 0) {
+			myGraph = graph.cycle;
+		}
+		else if (clicked == 1) {
+			myGraph = graph.star;
+		}
+		else if (clicked == 2) {
+			myGraph = graph.wheel;
+		}
+		else if (clicked == 3) {
+			myGraph = graph.complete;
+		}
+		else if (clicked == 4) {
+			myGraph = graph.path;
+		}
+		else if (clicked == 5) {
+			vertices = DefaultGraphs.initInfiniteSquare(defaultSize, lengthOption, vertices);
+		}
+		else if (clicked == 6) {
+			vertices = DefaultGraphs.initInfiniteHex(false, defaultSize, lengthOption, vertices);
+		}
+		else if (clicked == 7) {
+			vertices = DefaultGraphs.initInfiniteHex(true, defaultSize, lengthOption, vertices);
+		}
+		else if (clicked == 8) {
+			vertices = DefaultGraphs.initInfiniteTri(false, defaultSize, lengthOption, vertices);
+		}
+		else if (clicked == 9) {
+			vertices = DefaultGraphs.initInfiniteTri(true, defaultSize, lengthOption, vertices);
+		}
+		else if (clicked == 10) {
+			vertices = DefaultGraphs.initBinaryTree(defaultSize, displayWidth, displayHeight, lengthOption, vertices);
+		}
+		else if (clicked == 11) {
+			vertices = DefaultGraphs.initInfiniteOctagram(false, defaultSize, lengthOption, vertices);
+		}
+		if (clicked == -1){
+			return false;
+		}
+		return true;
+	}
+	public void placeElement() {
+		if (myGraph != graph.none) {
+			if (myGraph == graph.cycle) {
+				vertices = DefaultGraphs.initCycle(mouseX, mouseY, defaultSize, displayWidth, displayHeight, lengthOption, vertices);
+			}
+			if (myGraph == graph.star) {
+				vertices = DefaultGraphs.initStar(mouseX, mouseY, defaultSize, displayWidth, displayHeight, lengthOption, vertices);
+			}
+			if (myGraph == graph.wheel) {
+				vertices = DefaultGraphs.initWheel(mouseX, mouseY, defaultSize, displayWidth, displayHeight, lengthOption, vertices);
+			}
+			if (myGraph == graph.complete) {
+				vertices = DefaultGraphs.initComplete(mouseX, mouseY, defaultSize, displayWidth, displayHeight, lengthOption, vertices);
+			}
+			if (myGraph == graph.path) {
+				vertices = DefaultGraphs.initPath(mouseX, mouseY, defaultSize, displayWidth, displayHeight, lengthOption, vertices);
+			}
+			myGraph = graph.none;
+		}
+		else {
+			vertices.add(new Vertex(mouseX,mouseY));
+		}
+	}
 	public void setBadVertices() {
 		for (Vertex v : vertices) {
 			v.isBad = false;
@@ -437,9 +489,9 @@ public class Launcher extends PApplet {
 		ArrayList<ArrayList<Vertex>> all = new ArrayList<ArrayList<Vertex>>();
 		
 		while (order <= end) {
-			vertices = new ArrayList<Vertex>();
+			ArrayList<Vertex> tempVertices = new ArrayList<Vertex>();
 			for (int i = 0; i < order; i++) {
-				vertices.add(new Vertex((float)(sX+Math.cos(i*2*Math.PI/order)*defaultSize),(float)(sY+Math.sin(i*2*Math.PI/order)*defaultSize)));
+				tempVertices.add(new Vertex((float)(sX+Math.cos(i*2*Math.PI/order)*defaultSize),(float)(sY+Math.sin(i*2*Math.PI/order)*defaultSize)));
 			}
 			
 			//now try each config of edges
@@ -457,35 +509,35 @@ public class Launcher extends PApplet {
 				char[] chars = nowPerm.toCharArray();
 				for (int c = 0; c < chars.length; c++) {
 					if (chars[c] == '1') {
-						vertices.get(allEdges.get(c)[0]).connections.add(vertices.get(allEdges.get(c)[1]));
-						vertices.get(allEdges.get(c)[1]).connections.add(vertices.get(allEdges.get(c)[0]));
+						tempVertices.get(allEdges.get(c)[0]).connections.add(tempVertices.get(allEdges.get(c)[1]));
+						tempVertices.get(allEdges.get(c)[1]).connections.add(tempVertices.get(allEdges.get(c)[0]));
 					}
 				}
-				//check(testXtd, vertices);
+				//check(testXtd, tempVertices);
 				//if (true) {
 				//	return null;
 				//}
 				testXtd = 1;
-				ArrayList<Vertex> tempVertices = XTDCheck.check(testXtd, (ArrayList<Vertex>)vertices.clone());
-					while (tempVertices == null) {
+				ArrayList<Vertex> oneTest = XTDCheck.check(testXtd, (ArrayList<Vertex>)tempVertices.clone());
+					while (oneTest == null) {
 						testXtd++;
-						tempVertices = XTDCheck.check(testXtd, (ArrayList<Vertex>)vertices.clone());
+						oneTest = XTDCheck.check(testXtd, (ArrayList<Vertex>)tempVertices.clone());
 					}
-					vertices = tempVertices;
+					tempVertices = oneTest;
 				//System.out.println(i+" "+nowPerm+" "+perms);
 				
-				if (testXtd == order && Checks.graphConnected(vertices)) {
+				if (testXtd == order && Checks.graphConnected(tempVertices)) {
 					//System.out.println("orderstf"+testXtd+" "+order);
-					ArrayList<Vertex> neww = vertices;
+					ArrayList<Vertex> neww = tempVertices;
 					all.add(copy(neww));
-					for (Vertex v : vertices) {
+					for (Vertex v : tempVertices) {
 						v.connections = new ArrayList<Vertex>();
 						v.num = 0;
 					}
 				}
 				else {
 					//reset + continue
-					for (Vertex v : vertices) {
+					for (Vertex v : tempVertices) {
 						v.connections = new ArrayList<Vertex>();
 						v.num = 0;
 					}
@@ -524,6 +576,8 @@ public class Launcher extends PApplet {
 		return newL;
 		
 	}
+
+	// ---------------------------------------------------------------- UI ---------------------------------------------------------------------- //
 
 	public void draw(){
         background(50);
@@ -577,6 +631,7 @@ public class Launcher extends PApplet {
         
         //draw errors
     }
+
     public void drawUI() {
 		
 		noStroke();
@@ -706,7 +761,49 @@ public class Launcher extends PApplet {
 			
 		}
 		
+		drawThreadData();
 		
-		
+	}
+	public void drawThreadData() {
+		textAlign(RIGHT, TOP);
+		textSize(15);
+		strokeWeight(1);
+		int h = 750;
+		ArrayList<ThreadData> toRemove = new ArrayList<ThreadData>();
+		for (ThreadData td : threads) {
+			if (td.done) {
+				fill(0,255,0);
+				stroke(0,255,0);
+			}
+			else if (td.failed) {
+				fill(255,0,0);
+				stroke(255,0,0);
+			}
+			else {
+				fill(255);
+				stroke(255);
+			}
+			String print = td.name + ": n " + td.n + " e " + td.e + " xtd " + td.currXtd;
+			text(print, 1400, h);
+			float tw = textWidth(print);
+			if (click(1400-tw, h+2, tw, 15)) {
+				line(1400-tw, h+10, 1402, h+10);
+				if (mousePressed && mouseUp) {
+					if (td.done || td.failed) {
+						toRemove.add(td);
+					}
+					else {
+						td.thread.stop();
+					}
+				}
+			}
+			h -= 20;
+		}
+		for (ThreadData td : toRemove) {
+			threads.remove(td);
+		}
+		if (mousePressed) {
+			mouseUp = false;
+		}
 	}
 }

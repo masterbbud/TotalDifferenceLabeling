@@ -15,7 +15,11 @@ import processing.core.PVector;
 import processing.event.MouseEvent;
 
 public class XTDCheck {
+
     public static ArrayList<Vertex> check(int testXtd, ArrayList<Vertex> vertices) {
+        return null;  // FIX THIS IN LAUNCHER
+    }
+    public static ArrayList<Vertex> check(int testXtd, ArrayList<Vertex> vertices, CheckXtdThread thread) {
 		//System.out.println(vertices.get(0).possibles);
 		Vertex toCheck = vertices.get(0);
 		for (Vertex v : vertices) {
@@ -66,6 +70,11 @@ public class XTDCheck {
 			//if impossible config, delete possible for last checked vertex and try next one
 			//if no more vertices on current vertex, back up 1
 			//System.out.println("TRYING "+toCheck.possibles);
+
+            if (thread.stopASAP) {
+                return new ArrayList<Vertex>();
+            }
+
 			toCheck.num = toCheck.possibles.get(0);
 			//
 			//toCheck.possibles.remove(0);
