@@ -15,6 +15,7 @@ import processing.core.PVector;
 import processing.event.MouseEvent;
 
 public class Checks {
+
     public static Boolean graphConnected(ArrayList<Vertex> ver) {
 		for (Vertex v : ver) {
 			if (v.connections.size() == 0) {
@@ -23,6 +24,7 @@ public class Checks {
 		}
 		return true;
 	}
+
 	public static int graphSaturable(ArrayList<Vertex> ver) {
 		//complete search try
 		//find all solutions
@@ -82,6 +84,7 @@ public class Checks {
 		System.out.println("Adadadad");
 		return 0;
 	}
+
 	public static Boolean checkSat(ArrayList<Vertex> ver) {
 		// returns if the input graph is saturated
 		for (int i = 1; i <= ver.size(); i++) {
@@ -97,6 +100,7 @@ public class Checks {
 		}
 		return true;
 	}
+
     public static ArrayList<Vertex> allBadVertices(ArrayList<Vertex> ver) {
 		ArrayList<Vertex> bads = new ArrayList<Vertex>();
 		for (Vertex v : ver) {
@@ -134,6 +138,7 @@ public class Checks {
 		}
 		return sames;
 	}
+
 	public static ArrayList<Vertex> checkDoubles(Vertex v) {
 		ArrayList<Vertex> doubles = new ArrayList<Vertex>();
 		for (Vertex i : v.connections) {
@@ -144,6 +149,7 @@ public class Checks {
 		}
 		return doubles;
 	}
+
 	public static ArrayList<Vertex> checkSandies(Vertex v) {
 		ArrayList<Vertex> sandies = new ArrayList<Vertex>();
 		for (Vertex i : v.connections) {
@@ -159,6 +165,7 @@ public class Checks {
 		}
 		return sandies;
 	}
+
 	public static ArrayList<Vertex> checkStairs(Vertex v) {
 		ArrayList<Vertex> stairs = new ArrayList<Vertex>();
 		for (Vertex i : v.connections) {
@@ -174,6 +181,7 @@ public class Checks {
 		}
 		return stairs;
 	}
+    
     public static int countEdges(ArrayList<Vertex> vertices) {
         int count = 0;
         for (Vertex v : vertices) {

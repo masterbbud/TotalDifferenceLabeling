@@ -4,7 +4,7 @@ import java.util.ArrayList;
 
 public class CheckSetThread extends DefaultThread implements Runnable{
     
-    private ThreadData td;
+    public ThreadData td;
     private int start;
     private int end;
     private float sX;
@@ -14,6 +14,7 @@ public class CheckSetThread extends DefaultThread implements Runnable{
 
     public CheckSetThread(ThreadData td, int start, int end, float sX, float sY, int defaultSize, Launcher launcher) {
         this.td = td;
+        td.thread = this;
         this.start = start;
         this.end = end;
         this.sX = sX;
@@ -21,10 +22,16 @@ public class CheckSetThread extends DefaultThread implements Runnable{
         this.defaultSize = defaultSize;
         this.launcher = launcher;
     }
+
     public void run() {
         launcher.setThreadDone(checkSet(), td);
     }
+
     public ArrayList<ArrayList<Vertex>> checkSet() {
         return XTDCheck.lookForSupersat(start, end, sX, sY, defaultSize, this);
+    }
+
+    public void updateLauncher(int comp, int found) {
+        launcher.updateThreadCompletes(td, comp, found);
     }
 }

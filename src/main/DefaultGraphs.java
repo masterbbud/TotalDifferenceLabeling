@@ -3,6 +3,7 @@ package main;
 import java.util.ArrayList;
 
 public class DefaultGraphs {
+
     public static ArrayList<Vertex> initCycle(int sX, int sY, int defaultSize, int displayWidth, int displayHeight, int lengthOption, ArrayList<Vertex> vertices) {
 		int tempSize = defaultSize;
 		if (sX+defaultSize > displayWidth*13/14) {
@@ -30,6 +31,7 @@ public class DefaultGraphs {
 		defaultSize = tempSize;
         return vertices;
 	}
+
 	public static ArrayList<Vertex> initStar(int sX, int sY, int defaultSize, int displayWidth, int displayHeight, int lengthOption, ArrayList<Vertex> vertices) {
 		int tempSize = defaultSize;
 		if (sX+defaultSize > displayWidth*13/14) {
@@ -54,6 +56,7 @@ public class DefaultGraphs {
 		defaultSize = tempSize;
         return vertices;
 	}
+
 	public static ArrayList<Vertex> initWheel(int sX, int sY, int defaultSize, int displayWidth, int displayHeight, int lengthOption, ArrayList<Vertex> vertices) {
 		int tempSize = defaultSize;
 		if (sX+defaultSize > displayWidth*13/14) {
@@ -84,6 +87,7 @@ public class DefaultGraphs {
 		defaultSize = tempSize;
         return vertices;
 	}
+
 	public static ArrayList<Vertex> initComplete(int sX, int sY, int defaultSize, int displayWidth, int displayHeight, int lengthOption, ArrayList<Vertex> vertices) {
 		int tempSize = defaultSize;
 		if (sX+defaultSize > displayWidth*13/14) {
@@ -114,6 +118,7 @@ public class DefaultGraphs {
 		defaultSize = tempSize;
         return vertices;
 	}
+
 	public static ArrayList<Vertex> initPath(int sX, int sY, int defaultSize, int displayWidth, int displayHeight, int lengthOption, ArrayList<Vertex> vertices) {
 		int tempSize = defaultSize;
 		if (sX+defaultSize > displayWidth*13/14) {
@@ -133,6 +138,7 @@ public class DefaultGraphs {
 		defaultSize = tempSize;
         return vertices;
 	}
+
 	public static ArrayList<Vertex> initInfiniteSquare(int defaultSize, int lengthOption, ArrayList<Vertex> vertices) {
 		int sL = vertices.size();
 		int hori = lengthOption;
@@ -152,6 +158,7 @@ public class DefaultGraphs {
 		}
         return vertices;
 	}
+
 	public static ArrayList<Vertex> initInfiniteHex(Boolean shift, int defaultSize, int lengthOption, ArrayList<Vertex> vertices) {
 		int sL = vertices.size();
 		int hori = lengthOption;
@@ -178,6 +185,7 @@ public class DefaultGraphs {
 		}
         return vertices;
 	}
+
 	public static ArrayList<Vertex> initInfiniteTri(Boolean shift, int defaultSize, int lengthOption, ArrayList<Vertex> vertices) {
 		int sL = vertices.size();
 		int hori = lengthOption;
@@ -207,6 +215,7 @@ public class DefaultGraphs {
 		}
         return vertices;
 	}
+
 	public static ArrayList<Vertex> initBinaryTree(int defaultSize, int displayWidth, int displayHeight, int lengthOption, ArrayList<Vertex> vertices) {
 		int sL = vertices.size();
 		for (int i = 0; i < lengthOption; i++) {
@@ -226,6 +235,7 @@ public class DefaultGraphs {
 		}
         return vertices;
 	}
+
 	public static ArrayList<Vertex> initInfiniteOctagram(Boolean shift, int defaultSize, int lengthOption, ArrayList<Vertex> vertices) {
         // Is this used?
 		int sL = vertices.size();
@@ -253,6 +263,7 @@ public class DefaultGraphs {
 		}
         return vertices;
 	}
+
     public static ArrayList<ArrayList<Vertex>> getAllGraphsForOrder(int order, float sX, float sY, int defaultSize) {
         ArrayList<Vertex> tempVertices = new ArrayList<Vertex>();
         for (int i = 0; i < order; i++) {
@@ -284,6 +295,7 @@ public class DefaultGraphs {
         }
         return retList;
     }
+    
     public static ArrayList<ArrayList<Vertex>> getAllGraphsForRange(int start, int end, float sX, float sY, int defaultSize) {
         ArrayList<ArrayList<Vertex>> retList = new ArrayList<ArrayList<Vertex>>();
         for (int i = start; i <= end; i++) {

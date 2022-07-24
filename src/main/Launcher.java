@@ -8,11 +8,12 @@ import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.PrintWriter;
-import java.util.ArrayList;
+import java.util.*;
 
 import processing.core.PApplet;
 import processing.core.PVector;
 import processing.event.MouseEvent;
+import processing.core.PFont;
 
 enum mode {
 	place,
@@ -71,6 +72,12 @@ public class Launcher extends PApplet {
 	};
 
 	ArrayList<ThreadData> threads = new ArrayList<ThreadData>();
+
+	Map<String, PFont> fonts = new HashMap<String, PFont>();
+
+	ArrayList<UIElement> UIElements = new ArrayList<UIElement>();
+	ArrayList<ArrayList<UIElement>> drawLayers = new ArrayList<ArrayList<UIElement>>();
+	ArrayList<ArrayList<UIElement>> clickLayers = new ArrayList<ArrayList<UIElement>>();
 	
 	public static void main(String[] args) {
 		System.out.println("-------------\nINPUT NAME\n-------------\n");
@@ -85,27 +92,25 @@ public class Launcher extends PApplet {
 		for (String s : defaultGraphs){
 			graphNames.add(s);
 		}
+		fonts.put("Lato", createFont("data/Lato.ttf", 128));
+		fonts.put("Mono", createFont("data/Mono.ttf", 128));
+		UIElements.add(new UILabel(this, 50, 50, 50, 50, new int[]{40, 200, 40}, 1, "Next", new int[]{0, 0, 0}, fonts.get("Lato"), this::nextMode));
+		UIElements.add(new UILabel(this, 75, 75, 50, 50, new int[]{200, 40, 40}, 2, "Print", new int[]{0, 0, 0}, fonts.get("Lato"), this::doThing));
+		drawLayers = getLayers(false);
+		clickLayers = getLayers(true);
 	}
+
+	public void doThing() {
+		System.out.println("ATHING");
+	}
+
 	public Boolean click(float x, float y, float x2, float y2) {
 		if (mouseX > x && mouseX < x+x2 && mouseY > y && mouseY < y+y2) {
 			return true;
 		}
 		return false;
 	}
-	public void mouseWheel(MouseEvent event) {
-		// Handles scrolling on the list of Default Graphs
-		if (click(10,150,110,200)) {
-			float f = event.getCount();
-			//System.out.println(f);
-			scrollAmt += f;
-			if (scrollAmt < 0) {
-				scrollAmt = 0;
-			}
-			if (scrollAmt > graphNames.size() - 5) {
-				scrollAmt = graphNames.size() - 5;
-			}
-		}
-	}
+
 	public void nextMode(){
 		if (myMode == mode.place) {
 			myMode = mode.connect;
@@ -113,11 +118,83 @@ public class Launcher extends PApplet {
 		else if (myMode == mode.connect) {
 			myMode = mode.numbers;
 		}
-//		else if (myMode == mode.numbers) {
-//			currentSelected.num = Integer.parseInt(currentType);
-//			currentType = "";
-//		}
 	}
+	
+	public void setCurrentVertex(){
+		currentSelected.num = Integer.parseInt(String.valueOf(currentSelected.num)+key);
+	}
+
+	public void removeLastVertex(){
+		if (vertices.size() > 0) {
+			vertices.remove(vertices.size()-1);
+		}
+	}
+
+	public void removeLastEdge(){
+		if (currentSelected != null) {
+			if (currentSelected.connections.size() > 0) {
+				currentSelected.connections.get(currentSelected.connections.size()-1).connections.remove(currentSelected.connections.get(currentSelected.connections.size()-1).connections.size()-1);
+				currentSelected.connections.remove(currentSelected.connections.size()-1);
+			}
+		}
+	}
+
+	public void deleteAllVertices(){
+		myMode = mode.place;
+		currentSelected = null;
+		vertices = new ArrayList<Vertex>();
+		// May want to remove from views
+	}
+
+	public void moveViewRight(){
+		if (currentView < storeAll.size()-1) {
+			currentView++;
+		}
+		vertices = storeAll.get(currentView);
+	}
+
+	public void moveViewLeft(){
+		if (currentView > 0) {
+			currentView --;
+		}
+		vertices = storeAll.get(currentView);
+	}
+
+	public void printIsSaturable(){
+		ArrayList<Vertex> nw = new ArrayList<Vertex>();
+		for (Vertex v : vertices) {
+			nw.add(v);
+		}
+		int answer = Checks.graphSaturable(nw);
+		System.out.println(answer);
+	}
+
+	public void connectAllVertices() {
+		for (Vertex v : vertices) {
+			for (Vertex i : vertices) {
+				if (i != v) {
+					if (!v.connections.contains(i)) {
+						v.connections.add(i);
+					}
+					if (!i.connections.contains(v)) {
+						i.connections.add(v);
+					}
+				}
+			}
+		}
+	}
+
+	public void setBadVertices() {
+		for (Vertex v : vertices) {
+			v.isBad = false;
+		}
+		for (Vertex v : Checks.allBadVertices(vertices)) {
+			v.isBad = true;
+			//System.out.println(v.num);
+		}
+	}
+
+	// ---------------------------------------------------------- KEY MANAGEMENT ---------------------------------------------------------------- //
 	
 	public void keyPressed() {
 		if (keyCode == ENTER) {
@@ -136,7 +213,7 @@ public class Launcher extends PApplet {
 			deleteAllVertices();
 		}
 		if (key == 'p') {
-			getAllSupersats();
+			checkSupersatsThread(6, 6, displayWidth/2, displayHeight/2, defaultSize);
 		}
 		if (key == 'l') {
 			moveViewRight();
@@ -155,9 +232,7 @@ public class Launcher extends PApplet {
 		}
 		setBadVertices();
 	}
-	public void setCurrentVertex(){
-		currentSelected.num = Integer.parseInt(String.valueOf(currentSelected.num)+key);
-	}
+
 	public void handleBackspace(){
 		if (myMode == mode.place) {
 			removeLastVertex();
@@ -169,74 +244,61 @@ public class Launcher extends PApplet {
 			currentSelected.num = 0;
 		}
 	}
-	public void removeLastVertex(){
-		if (vertices.size() > 0) {
-			vertices.remove(vertices.size()-1);
-		}
-	}
-	public void removeLastEdge(){
-		if (currentSelected != null) {
-			if (currentSelected.connections.size() > 0) {
-				currentSelected.connections.get(currentSelected.connections.size()-1).connections.remove(currentSelected.connections.get(currentSelected.connections.size()-1).connections.size()-1);
-				currentSelected.connections.remove(currentSelected.connections.size()-1);
+
+	// --------------------------------------------------------- CLICK MANAGEMENT --------------------------------------------------------------- //
+
+	public void mouseWheel(MouseEvent event) {
+		// Handles scrolling on the list of Default Graphs
+		if (click(10,150,110,200)) {
+			float f = event.getCount();
+			//System.out.println(f);
+			scrollAmt += f;
+			if (scrollAmt < 0) {
+				scrollAmt = 0;
+			}
+			if (scrollAmt > graphNames.size() - 5) {
+				scrollAmt = graphNames.size() - 5;
 			}
 		}
 	}
-	public void deleteAllVertices(){
-		myMode = mode.place;
-		currentSelected = null;
-		vertices = new ArrayList<Vertex>();
-		// May want to remove from views
-	}
-	public void getAllSupersats(){
-		checkSupersatsThread(5, 5, displayWidth/2, displayHeight/2, defaultSize);
-	}
-	public void moveViewRight(){
-		if (currentView < storeAll.size()-1) {
-			currentView++;
-		}
-		vertices = storeAll.get(currentView);
-	}
-	public void moveViewLeft(){
-		if (currentView > 0) {
-			currentView --;
-		}
-		vertices = storeAll.get(currentView);
-	}
-	public void printIsSaturable(){
-		ArrayList<Vertex> nw = new ArrayList<Vertex>();
-		for (Vertex v : vertices) {
-			nw.add(v);
-		}
-		int answer = Checks.graphSaturable(nw);
-		System.out.println(answer);
-	}
-	public void topModeClick(){
-		if (myMode == mode.place) {
-			myMode = mode.connect;
-		}
-		else if (myMode == mode.connect) {
-			myMode = mode.place;
-		}
-		else if (myMode == mode.numbers) {
-			myMode = mode.place;
-		}
-	}
-	public void bottomModeClick(){
-		if (myMode == mode.place) {
-			myMode = mode.numbers;
-		}
-		else if (myMode == mode.connect) {
-			myMode = mode.numbers;
-		}
-		else if (myMode == mode.numbers) {
-			myMode = mode.connect;
-		}
-	}
+
 	public void mouseReleased() {
 		mouseUp = true;
 	}
+
+	public ArrayList<ArrayList<UIElement>> getLayers(Boolean flip) {
+		TreeMap<Integer, ArrayList<UIElement>> layers = new TreeMap<Integer, ArrayList<UIElement>>();
+		for (UIElement i : UIElements) {
+			if (layers.containsKey(i.layer)) {
+				layers.get(i.layer).add(i);
+			}
+			else {
+				layers.put(i.layer, new ArrayList<UIElement>());
+				layers.get(i.layer).add(i);
+			}
+		}
+		ArrayList<ArrayList<UIElement>> retList = new ArrayList<ArrayList<UIElement>>();
+		for (ArrayList<UIElement> layer : layers.values()) {
+			retList.add(layer);
+		}
+		if (flip) {
+			ArrayList<ArrayList<UIElement>> flipped = new ArrayList<ArrayList<UIElement>>();
+			for (int i = retList.size()-1; i >= 0; i--) {
+				flipped.add(retList.get(i));
+			}
+			return flipped;
+		}
+		return retList;
+	}
+
 	public void mousePressed() {
+		for (ArrayList<UIElement> layer : clickLayers) {
+			for (UIElement i : layer) {
+				if (i.click()) {
+					return;
+				}
+			}
+		}
 		if (click(1320,20,100,30)) {
 			stageMenu = ! stageMenu;
 			return;
@@ -285,6 +347,31 @@ public class Launcher extends PApplet {
 		//connect points if connecting points
 		
 	}
+
+	public void topModeClick(){
+		if (myMode == mode.place) {
+			myMode = mode.connect;
+		}
+		else if (myMode == mode.connect) {
+			myMode = mode.place;
+		}
+		else if (myMode == mode.numbers) {
+			myMode = mode.place;
+		}
+	}
+
+	public void bottomModeClick(){
+		if (myMode == mode.place) {
+			myMode = mode.numbers;
+		}
+		else if (myMode == mode.connect) {
+			myMode = mode.numbers;
+		}
+		else if (myMode == mode.numbers) {
+			myMode = mode.connect;
+		}
+	}
+
 	public void handleNumbersClick() {
 		Vertex clicked = getVClicked();
 		if (clicked != null) {
@@ -307,20 +394,7 @@ public class Launcher extends PApplet {
 			checkXtd(testXtd);
 		}
 	}
-	public void connectAllVertices() {
-		for (Vertex v : vertices) {
-			for (Vertex i : vertices) {
-				if (i != v) {
-					if (!v.connections.contains(i)) {
-						v.connections.add(i);
-					}
-					if (!i.connections.contains(v)) {
-						i.connections.add(v);
-					}
-				}
-			}
-		}
-	}
+
 	public Boolean clickVertex() {
 		Vertex clicked = getVClicked();
 		if (clicked != null) {
@@ -337,6 +411,7 @@ public class Launcher extends PApplet {
 		}
 		return false;
 	}
+
 	public Boolean clickLeftUI() {
 		if (click(15,30,15,30)) {
 			if (lengthOption > 1) {
@@ -353,6 +428,7 @@ public class Launcher extends PApplet {
 		}
 		return false;
 	}
+
 	public Boolean clickScrollBar() {
 		int clicked = -1;
 		if (click(15,155,100,30)) {
@@ -411,6 +487,7 @@ public class Launcher extends PApplet {
 		}
 		return true;
 	}
+
 	public void placeElement() {
 		if (myGraph != graph.none) {
 			if (myGraph == graph.cycle) {
@@ -434,15 +511,7 @@ public class Launcher extends PApplet {
 			vertices.add(new Vertex(mouseX,mouseY));
 		}
 	}
-	public void setBadVertices() {
-		for (Vertex v : vertices) {
-			v.isBad = false;
-		}
-		for (Vertex v : Checks.allBadVertices(vertices)) {
-			v.isBad = true;
-			//System.out.println(v.num);
-		}
-	}
+
 	public Vertex getVClicked() {
 		for (Vertex v : vertices) {
 			if ((v.x-mouseX)*(v.x-mouseX)+(v.y-mouseY)*(v.y-mouseY) < pointSize*pointSize) {
@@ -455,12 +524,19 @@ public class Launcher extends PApplet {
 	// ----------------------------------------------------------- CHECK THREADS ---------------------------------------------------------------- //
 
 	public ArrayList<Vertex> checkXtd(int xtd) {
-		ThreadData sendTd = new ThreadData("???", vertices.size(), Checks.countEdges(vertices));
+		ThreadData sendTd;
+		if (xtd == 0) {
+			sendTd = new ThreadData("???", vertices.size(), Checks.countEdges(vertices));
+		}
+		else {
+			sendTd = new ThreadData("???", vertices.size(), Checks.countEdges(vertices), xtd);
+		}
 		threads.add(sendTd);
-		Thread thread = new Thread(new CheckXtdThread(xtd, vertices, sendTd, this));
+		Thread thread = new Thread(new CheckXtdThread(xtd, vertices, sendTd, true, true, this));
 		thread.start();
 		return new ArrayList<Vertex>();
 	}
+
 	public void xtdThreadDone(ArrayList<Vertex> result, ThreadData thread) {
 		if (result == null){
 			thread.failed = true;
@@ -470,24 +546,31 @@ public class Launcher extends PApplet {
 		}
 		else {
 			storeAll.add(result);
-			thread.currXtd += 1;
 			thread.done = true;
 		}
 	}
+
 	public void updateThreadTestXtd(ThreadData thread, int xtd) {
 		thread.currXtd = xtd;
 	}
+
+	public void updateThreadCompletes(ThreadData thread, int complete, int found) {
+		thread.currComplete = complete;
+		thread.currFound = found;
+	}
+
 	public void closeThread(ThreadData thread) {
 		threads.remove(thread);
 	}
 
 	public ArrayList<ArrayList<Vertex>> checkSupersatsThread(int start, int end, float sX, float sY, int defaultSize) {
-		ThreadData sendTd = new ThreadData("Checking Supersats", 1, 1);
+		ThreadData sendTd = new ThreadData("Checking Supersats");
 		threads.add(sendTd);
 		Thread thread = new Thread(new CheckSetThread(sendTd, start, end, sX, sY, defaultSize, this));
 		thread.start();
 		return new ArrayList<ArrayList<Vertex>>();
 	}
+
 	public void setThreadDone(ArrayList<ArrayList<Vertex>> result, ThreadData thread) {
 		if (result == null){
 			thread.failed = true;
@@ -504,10 +587,10 @@ public class Launcher extends PApplet {
 		}
 	}
 
-
 	// ---------------------------------------------------------------- UI ---------------------------------------------------------------------- //
 
 	public void draw(){
+		textFont(fonts.get("Lato"));
         background(50);
         //point(displayWidth*15/16,10);
         ellipseMode(CENTER);
@@ -539,7 +622,7 @@ public class Launcher extends PApplet {
             fill(255);
             stroke(255);
         }
-        
+        textSize(12);
         for (Vertex v : vertices) {
             fill(0);
             if (v.num > 0) {
@@ -561,7 +644,6 @@ public class Launcher extends PApplet {
     }
 
     public void drawUI() {
-		
 		noStroke();
 		
 		fill(220);
@@ -688,10 +770,17 @@ public class Launcher extends PApplet {
 			}
 			
 		}
-		
+		textFont(fonts.get("Mono"));
 		drawThreadData();
 		
+		for (ArrayList<UIElement> layer : drawLayers) {
+			for (UIElement i : layer) {
+				i.draw();
+			}
+		}
+
 	}
+
 	public void drawThreadData() {
 		textAlign(RIGHT, TOP);
 		textSize(15);
@@ -711,8 +800,8 @@ public class Launcher extends PApplet {
 				fill(255);
 				stroke(255);
 			}
-			String print = td.name + ": n " + td.n + " e " + td.e + " xtd " + td.currXtd;
-			text(print, 1400, h);
+			String print = td.getString();
+			writeMonospace(print, 1400, h, true);
 			float tw = textWidth(print);
 			if (click(1400-tw, h+2, tw, 15)) {
 				line(1400-tw, h+10, 1402, h+10);
@@ -732,6 +821,26 @@ public class Launcher extends PApplet {
 		}
 		if (mousePressed) {
 			mouseUp = false;
+		}
+	}
+	public void writeMonospace(String text, float x, float y, Boolean right) {
+		// Please use a monospace type font, otherwise the result may be messy
+		float size = 0;
+		char[] chars = text.toCharArray();
+		for (char c : chars) {
+			if (textWidth(c) > size) {
+				size = textWidth(c);
+			}
+		}
+		if (right) {
+			for (int i = chars.length - 1; i >= 0; i--) {
+				text(chars[i], x-size*(chars.length-i-1), y);
+			}
+		}
+		else {
+			for (int i = 0; i < chars.length; i++) {
+				text(chars[i], x+size*i, y);
+			}
 		}
 	}
 }
