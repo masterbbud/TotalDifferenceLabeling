@@ -15,7 +15,7 @@ import processing.core.PVector;
 import processing.event.MouseEvent;
 
 public class Checks {
-    public Boolean graphConnected(ArrayList<Vertex> ver) {
+    public static Boolean graphConnected(ArrayList<Vertex> ver) {
 		for (Vertex v : ver) {
 			if (v.connections.size() == 0) {
 				return false;
@@ -23,7 +23,7 @@ public class Checks {
 		}
 		return true;
 	}
-	public int graphSaturable(ArrayList<Vertex> ver) {
+	public static int graphSaturable(ArrayList<Vertex> ver) {
 		//complete search try
 		//find all solutions
 		//if all are saturated, return 2
@@ -82,7 +82,7 @@ public class Checks {
 		System.out.println("Adadadad");
 		return 0;
 	}
-	public Boolean checkSat(ArrayList<Vertex> ver) {
+	public static Boolean checkSat(ArrayList<Vertex> ver) {
 		// returns if the input graph is saturated
 		for (int i = 1; i <= ver.size(); i++) {
 			Boolean foundOne = false;
@@ -97,7 +97,7 @@ public class Checks {
 		}
 		return true;
 	}
-    public ArrayList<Vertex> allBadVertices(ArrayList<Vertex> ver) {
+    public static ArrayList<Vertex> allBadVertices(ArrayList<Vertex> ver) {
 		ArrayList<Vertex> bads = new ArrayList<Vertex>();
 		for (Vertex v : ver) {
 			for (Vertex i : checkSames(v)) {
@@ -124,7 +124,7 @@ public class Checks {
 		return bads;
 	}
 	
-	public ArrayList<Vertex> checkSames(Vertex v) {
+	public static ArrayList<Vertex> checkSames(Vertex v) {
 		ArrayList<Vertex> sames = new ArrayList<Vertex>();
 		for (Vertex i : v.connections) {
 			if (i.num == v.num && i.num != 0 && v.num != 0) {
@@ -134,7 +134,7 @@ public class Checks {
 		}
 		return sames;
 	}
-	public ArrayList<Vertex> checkDoubles(Vertex v) {
+	public static ArrayList<Vertex> checkDoubles(Vertex v) {
 		ArrayList<Vertex> doubles = new ArrayList<Vertex>();
 		for (Vertex i : v.connections) {
 			if ((i.num == 2*v.num || 2*i.num == v.num) && i.num != 0 && v.num != 0) {
@@ -144,7 +144,7 @@ public class Checks {
 		}
 		return doubles;
 	}
-	public ArrayList<Vertex> checkSandies(Vertex v) {
+	public static ArrayList<Vertex> checkSandies(Vertex v) {
 		ArrayList<Vertex> sandies = new ArrayList<Vertex>();
 		for (Vertex i : v.connections) {
 			for (Vertex c : i.connections) {
@@ -159,7 +159,7 @@ public class Checks {
 		}
 		return sandies;
 	}
-	public ArrayList<Vertex> checkStairs(Vertex v) {
+	public static ArrayList<Vertex> checkStairs(Vertex v) {
 		ArrayList<Vertex> stairs = new ArrayList<Vertex>();
 		for (Vertex i : v.connections) {
 			for (Vertex c : i.connections) {

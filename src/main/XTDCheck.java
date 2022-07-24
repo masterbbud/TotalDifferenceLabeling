@@ -15,7 +15,7 @@ import processing.core.PVector;
 import processing.event.MouseEvent;
 
 public class XTDCheck {
-    public ArrayList<Vertex> check(int testXtd, ArrayList<Vertex> vertices) {
+    public static ArrayList<Vertex> check(int testXtd, ArrayList<Vertex> vertices) {
 		//System.out.println(vertices.get(0).possibles);
 		Vertex toCheck = vertices.get(0);
 		for (Vertex v : vertices) {
@@ -138,7 +138,7 @@ public class XTDCheck {
 		//fix all vertices in r2 that still have improper possibles
 		//repeat
 	}
-	public ArrayList<Vertex> fixedList(ArrayList<Vertex> toCheck, ArrayList<Vertex> vertices ,int testXtd){
+	public static ArrayList<Vertex> fixedList(ArrayList<Vertex> toCheck, ArrayList<Vertex> vertices ,int testXtd){
 		for (Vertex v : vertices) {
 			v.possibles = new ArrayList<Integer>();
 			if (! toCheck.contains(v)) {
@@ -190,7 +190,7 @@ public class XTDCheck {
 		}
 		return vertices;
 	}
-	public ArrayList<Vertex> check_recursive(Vertex check, ArrayList<Vertex> tempVertices) {
+	public static ArrayList<Vertex> check_recursive(Vertex check, ArrayList<Vertex> tempVertices) {
 		/*if (check.possibles.size() == 0) {
 			if (checkList.size() > 0) {
 				Vertex toCheck = checkList.get(checkList.size()-1);
@@ -285,7 +285,7 @@ public class XTDCheck {
 			return check_recursive(toCheck, tempVertices);
 		}
 	}
-	public void resetPossibles(int testXtd, Vertex v, ArrayList<Vertex> tempVertices) {
+	public static void resetPossibles(int testXtd, Vertex v, ArrayList<Vertex> tempVertices) {
 		for (int i = 1; i < testXtd; i++) {
 			v.possibles.add(i);
 			for (Vertex adj : v.connections) {
@@ -341,7 +341,7 @@ public class XTDCheck {
 			}*/
 		
 	}
-	public ArrayList<Vertex> fix_possibles(Vertex placed, ArrayList<Vertex> tempVertices) {
+	public static ArrayList<Vertex> fix_possibles(Vertex placed, ArrayList<Vertex> tempVertices) {
 		for (Vertex v : placed.connections) {
 			v.possibles.remove(Integer.valueOf(placed.num));
 			if (placed.num%2 == 0) {
@@ -367,7 +367,7 @@ public class XTDCheck {
 		
 		return tempVertices;
 	}
-	public ArrayList<Vertex> return_possibles(Vertex placed, ArrayList<Vertex> tempVertices, int Xtd){
+	public static ArrayList<Vertex> return_possibles(Vertex placed, ArrayList<Vertex> tempVertices, int Xtd){
 		for (Vertex v : placed.connections) {
 			if (!v.possibles.contains(placed.num)) {
 				v.possibles.add(Integer.valueOf(placed.num));
